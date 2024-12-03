@@ -135,7 +135,7 @@ fn part_one(input: &str) -> usize {
         let mut direction = None;
         let mut previous = None;
         for num in line.split_whitespace() {
-            let num = num.parse().unwrap()
+            let num = num.parse().unwrap();
             if let Some(prev) = previous {
                 if (1..=3).contains(&i32::abs_diff(num, prev)) {
                     let dir = i32::cmp(&num, &prev);
