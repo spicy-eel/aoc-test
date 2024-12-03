@@ -110,7 +110,7 @@ impl StateTracker {
 }
 
 #[aoc(day2, part2)]
-fn part_two(input: &str) -> usize {
+fn part2(input: &str) -> usize {
 	input.lines().filter(|line| {
 		let mut ascending_state = StateTracker::for_direction(Dir::Increasing);
 		let mut descending_state = StateTracker::for_direction(Dir::Decreasing);
@@ -130,7 +130,7 @@ fn part_two(input: &str) -> usize {
 }
 
 #[aoc(day2, part1)]
-fn part_one(input: &str) -> usize {
+fn part1(input: &str) -> usize {
     input.lines().filter(|line| {
         let mut direction = None;
         let mut previous = None;
