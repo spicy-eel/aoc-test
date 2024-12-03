@@ -116,7 +116,7 @@ fn part_two(input: &str) -> usize {
 		let mut descending_state = StateTracker::for_direction(Dir::Decreasing);
 		
 		for num in line.split(' ') {
-		    let num = num.parse().unwrap();
+		    let num = unsafe { num.parse().unwrap_unchecked() };
             ascending_state.apply_value(num);
             descending_state.apply_value(num);
             
@@ -135,7 +135,7 @@ fn part_one(input: &str) -> usize {
         let mut direction = None;
         let mut previous = None;
         for num in line.split_whitespace() {
-            let num = num.parse().unwrap();
+            let num = unsafe { num.parse().unwrap_unchecked() };
             if let Some(prev) = previous {
                 if (1..=3).contains(&i32::abs_diff(num, prev)) {
                     let dir = i32::cmp(&num, &prev);
