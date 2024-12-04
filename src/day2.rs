@@ -101,7 +101,7 @@ impl StateTracker {
 		matches!(self.state, ProblemState::Invalid)
 	}
 	
-    #[allow(unused)]
+	#[allow(unused)]
 	fn is_valid(&self) -> bool {
 		use ProblemState::*;
 		
@@ -116,44 +116,44 @@ pub fn part2(input: &str) -> usize {
 		let mut descending_state = StateTracker::for_direction(Dir::Decreasing);
 		
 		for num in line.split(' ') {
-		    let num = unsafe { num.parse().unwrap_unchecked() };
-            ascending_state.apply_value(num);
-            descending_state.apply_value(num);
-            
-            if ascending_state.is_invalid() && descending_state.is_invalid() {
-                return false;
-            }
+			let num = unsafe { num.parse().unwrap_unchecked() };
+			ascending_state.apply_value(num);
+			descending_state.apply_value(num);
+			
+			if ascending_state.is_invalid() && descending_state.is_invalid() {
+				return false;
+			}
 		}
 		
-		true //ascending_state.is_valid() || descending_state.is_valid()
+		true // ascending_state.is_valid() || descending_state.is_valid()
 	}).count()
 }
 
 #[aoc(day2, part1)]
 pub fn part1(input: &str) -> usize {
-    input.lines().filter(|line| {
-        let mut direction = None;
-        let mut previous = None;
-        for num in line.split_whitespace() {
-            let num = unsafe { num.parse().unwrap_unchecked() };
-            if let Some(prev) = previous {
-                if (1..=3).contains(&i32::abs_diff(num, prev)) {
-                    let dir = i32::cmp(&num, &prev);
-                    if let Some(direction) = direction {
-                        if direction != dir {
-                            return false;
-                        }
-                    } else {
-                        direction = Some(dir);
-                    }
-                } else {
-                    return false;
-                }
-            }
-            
-            previous = Some(num);
-        }
-        
-        true // previous.is_some() // lines should probably have at least one reading to count
-    }).count()
+	input.lines().filter(|line| {
+		let mut direction = None;
+		let mut previous = None;
+		for num in line.split_whitespace() {
+			let num = unsafe { num.parse().unwrap_unchecked() };
+			if let Some(prev) = previous {
+				if (1..=3).contains(&i32::abs_diff(num, prev)) {
+					let dir = i32::cmp(&num, &prev);
+					if let Some(direction) = direction {
+						if direction != dir {
+							return false;
+						}
+					} else {
+						direction = Some(dir);
+					}
+				} else {
+					return false;
+				}
+			}
+			
+			previous = Some(num);
+		}
+		
+		true // previous.is_some() // lines should probably have at least one reading to count
+	}).count()
 }

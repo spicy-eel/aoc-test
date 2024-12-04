@@ -1,6 +1,6 @@
-#[aoc(day3, part1)]
+#[aoc(day3, part1)] // I did not bother optimizing this at all and will be amazed if it benchmarks well.
 pub fn part1(input: &str) -> u64 {
-    let mut total = 0;
+	let mut total = 0;
 	for candidate in input.split("mul(").skip(1) {
 		if let Some((first, rest)) = candidate.split_once(',') {
 			if let Some((second, _)) = rest.split_once(')') {
