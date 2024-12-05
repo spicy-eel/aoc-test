@@ -114,7 +114,6 @@ fn check_matching_from(search: GridRefWithLn<u8>, from: (usize, usize), offset: 
 //	let Some((&letter, rest)) = word_remainder.split_first() else {
 //		return true;
 //	};
-	
 	let (from_row, from_col) = from;
 	let (off_row, off_col) = offset;
 	
@@ -230,4 +229,3 @@ pub fn part2(input: &str) -> u32 {
 	
 	count
 }
-
