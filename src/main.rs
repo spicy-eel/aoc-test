@@ -1,3 +1,4 @@
+#![feature(ascii_char, new_zeroed_alloc)]
 extern crate aoc_test;
 extern crate aoc_runner_derive;
 extern crate aoc_runner;
