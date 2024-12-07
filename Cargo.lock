@@ -33,7 +33,7 @@ dependencies = [
 
 [[package]]
 name = "aoc-test"
-version = "0.4.0"
+version = "0.7.0"
 dependencies = [
  "aoc-runner",
  "aoc-runner-derive",
