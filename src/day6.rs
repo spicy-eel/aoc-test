@@ -1,5 +1,6 @@
 // #![feature(ascii_char, new_zeroed_alloc)]
-use std::{ascii, collections::HashSet, mem, num::NonZero};
+use std::{ascii, /* collections::HashSet, */ mem, num::NonZero};
+use rustc_hash::{FxBuildHasher, FxHashSet as HashSet};
 
 #[derive(Copy, Eq, Clone, PartialEq)]
 enum Space {
@@ -257,8 +258,8 @@ pub fn part2(input: &str) -> u32 {
 	let mut direction = Direction::North;
 	
 	*unsafe { grid.get_unchecked_mut(position.0, position.1) } = Space::Visited;
-	let mut hit_walls_at = HashSet::with_capacity(64);
-	let mut hit_walls_inner_buffer = HashSet::with_capacity(64);
+	let mut hit_walls_at = HashSet::with_capacity_and_hasher(64, FxBuildHasher);
+	let mut hit_walls_inner_buffer = HashSet::with_capacity_and_hasher(64, FxBuildHasher);
 	
 	let mut possibilities = 0;
 	loop {

@@ -1,11 +1,12 @@
 [package]
 name = "aoc-test"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 
 [lib]
 bench = false
 
 [dependencies]
+rustc-hash = "2.1"
 aoc-runner = "0.3.0"
 aoc-runner-derive = "0.3.0"
