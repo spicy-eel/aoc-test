@@ -23,7 +23,7 @@ fn check_for_match_from_end_1(target: NonZero<u64>, remaining: &[NonZero<u64>], 
 
 #[aoc(day7, part1)]
 pub fn part1(input: &str) -> u64 {
-	let mut buffer = Vec::with_capacity(10);
+	let mut buffer = Vec::with_capacity(12);
 	input.lines().filter_map(|line| {
 	//	let (target, values) = line.split_once(':').unwrap();
 	//	let start = match target.parse().unwrap();
@@ -52,7 +52,7 @@ fn check_for_match_from_end_2(target: NonZero<u64>, remaining: &[NonZero<u64>], 
 
 #[aoc(day7, part2)]
 pub fn part2(input: &str) -> u64 {
-	let mut buffer = Vec::with_capacity(10);
+	let mut buffer = Vec::with_capacity(12);
 	input.lines().filter_map(|line| {
 		let (start, target, remaining) = unsafe { parse_line(line, &mut buffer).unwrap_unchecked() };
 		check_for_match_from_end_2(target, remaining, start).then(|| start.get())
