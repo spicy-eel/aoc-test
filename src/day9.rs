@@ -140,7 +140,7 @@ fn compacted_checksum_bytes(files: &[u8]) -> u64 {
 }
 
 #[aoc(day9, part1)]
-fn part1(input: &str) -> u64 {
+pub fn part1(input: &str) -> u64 {
 	compacted_checksum_bytes(input.trim().as_bytes())
 }
 
@@ -223,7 +223,7 @@ fn checksum(files: &[FileChunk]) -> u64 {
 }
 
 #[aoc(day9, part2)]
-fn part2(input: &str) -> u64 {
+pub fn part2(input: &str) -> u64 {
 	let input = input.trim().as_bytes();
 	
 	let mut files = Vec::with_capacity(input.len() + input.len() / 16);
