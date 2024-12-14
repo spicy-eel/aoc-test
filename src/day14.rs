@@ -1,4 +1,4 @@
-use std::{convert, iter};
+use std::{convert, iter, mem};
 
 #[derive(Copy, Clone)]
 struct Robot {
@@ -50,7 +50,7 @@ pub fn part1(input: &str) -> u32 {
 
 #[aoc(day14, part2)]
 pub fn part2(input: &str) -> u32 {
-	let mut robots = Vec::with_capacity(400);
+	let mut robots = Vec::with_capacity(500);
 	
 	for line in input.lines() {
 		let robot = unsafe { try_parse_robot(&line).unwrap_unchecked() };
@@ -61,30 +61,37 @@ pub fn part2(input: &str) -> u32 {
 	let mut picture = [[false; WIDTH as usize]; HEIGHT as usize];
 	
 	for iteration in 3000.. {
+		let mut had_overlap = false;
 		for &robot in &robots {
 			let x = (robot.x as i64 + robot.vx as i64 * iteration as i64).rem_euclid(WIDTH as i64) as usize;
 			let y = (robot.y as i64 + robot.vy as i64 * iteration as i64).rem_euclid(HEIGHT as i64) as usize;
 			
-			picture[y][x] = true;
+			
+			if mem::replace(&mut picture[y][x], true) {
+				had_overlap = true;
+				break;
+			};
 		}
 		
-		let mut adjacencies = 0;
-		for (row, contents) in enumerate(&picture) {
-			let (adjacent_rows, max_index) = if row == 0 {
-				([&picture[1], &picture[1]], 0)
-			} else if row == HEIGHT as usize - 1 {
-				([&picture[HEIGHT as usize - 2], &picture[HEIGHT as usize - 2]], 0)
-			} else {
-				([&picture[row - 1], &picture[row + 1]], 1)
-			};
-			
-			let adjacent_rows = &adjacent_rows[..=max_index];
-			
-			for col in enumerate(contents).filter_map(|(i, &b)| b.then(|| i)) {
-				if map(adjacent_rows, |r| r[col]).chain(filter_map([col.wrapping_sub(1), col + 1], |i| contents.get(i).copied())).any(convert::identity) {
-					adjacencies += 1;
-					if adjacencies >= 353 {
-						return iteration;
+		if !had_overlap {
+			let mut adjacencies = 0;
+			for (row, contents) in enumerate(&picture) {
+				let (adjacent_rows, max_index) = if row == 0 {
+					([&picture[1], &picture[1]], 0)
+				} else if row == HEIGHT as usize - 1 {
+					([&picture[HEIGHT as usize - 2], &picture[HEIGHT as usize - 2]], 0)
+				} else {
+					([&picture[row - 1], &picture[row + 1]], 1)
+				};
+				
+				let adjacent_rows = &adjacent_rows[..=max_index];
+				
+				for col in enumerate(contents).filter_map(|(i, &b)| b.then(|| i)) {
+					if map(adjacent_rows, |r| r[col]).chain(filter_map([col.wrapping_sub(1), col + 1], |i| contents.get(i).copied())).any(convert::identity) {
+						adjacencies += 1;
+						if adjacencies >= 353 {
+							return iteration;
+						}
 					}
 				}
 			}
