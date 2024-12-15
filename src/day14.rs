@@ -74,22 +74,17 @@ pub fn part2(input: &str) -> u32 {
 		}
 		
 		if !had_overlap {
-			let mut adjacencies = 0;
-			for (row, contents) in enumerate(&picture) {
-				let (adjacent_rows, max_index) = if row == 0 {
-					([&picture[1], &picture[1]], 0)
-				} else if row == HEIGHT as usize - 1 {
-					([&picture[HEIGHT as usize - 2], &picture[HEIGHT as usize - 2]], 0)
-				} else {
-					([&picture[row - 1], &picture[row + 1]], 1)
-				};
-				
-				let adjacent_rows = &adjacent_rows[..=max_index];
-				
-				for col in enumerate(contents).filter_map(|(i, &b)| b.then(|| i)) {
-					if map(adjacent_rows, |r| r[col]).chain(filter_map([col.wrapping_sub(1), col + 1], |i| contents.get(i).copied())).any(convert::identity) {
-						adjacencies += 1;
-						if adjacencies >= 353 {
+			let mut enclosed = 0;
+			
+			// There are 7 characters between the edge of the tree's frame and the outermost "enclosed" pixel horizontally.
+			// There are actually only 6 vertically, but this'll still skip at most two of the 161 in the picture, which still leaves much more than 100.
+			// (Looking for 100 is probably overly conservative, too, seeing as the only time my input produces "enclosed" pixels at all is when the tree appears.)
+			for (row, contents) in enumerate(&picture[..(HEIGHT - 7) as usize]).skip(7) {
+				let adj_rows = [&picture[row - 1], &picture[row + 1]];
+				for col in enumerate(&contents[..(WIDTH - 7) as usize]).skip(7).filter_map(|(i, &b)| b.then(|| i)) {
+					if map([col - 1, col + 1], |i| contents[i]).chain(map(adj_rows, |r| r[col])).all(convert::identity) {
+						enclosed += 1;
+						if enclosed >= 100 { // Should be exactly 161 in tree.
 							return iteration;
 						}
 					}
@@ -105,10 +100,6 @@ pub fn part2(input: &str) -> u32 {
 
 fn enumerate<I: IntoIterator>(i: I) -> iter::Enumerate<I::IntoIter> {
 	i.into_iter().enumerate()
-}
-
-fn filter_map<I: IntoIterator, O, F: FnMut(I::Item) -> Option<O>>(i: I, f: F) -> iter::FilterMap<I::IntoIter, F> {
-	i.into_iter().filter_map(f)
 }
 
 fn map<I: IntoIterator, O, F: FnMut(I::Item) -> O>(i: I, f: F) -> iter::Map<I::IntoIter, F> {
