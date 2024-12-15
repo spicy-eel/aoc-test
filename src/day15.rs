@@ -205,7 +205,7 @@ pub fn part1(input: &str) -> u64 {
 				b'O' => Space::Box,
 				b'.' => Space::Empty,
 				b'@' => {
-					position = (i / row_length, (i % row_length) * 2);
+					position = (i / row_length, i % row_length);
 					Space::Empty
 				},
 				_ => unreachable!()
