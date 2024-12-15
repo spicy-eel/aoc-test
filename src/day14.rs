@@ -66,7 +66,6 @@ pub fn part2(input: &str) -> u32 {
 			let x = (robot.x as i64 + robot.vx as i64 * iteration as i64).rem_euclid(WIDTH as i64) as usize;
 			let y = (robot.y as i64 + robot.vy as i64 * iteration as i64).rem_euclid(HEIGHT as i64) as usize;
 			
-			
 			if mem::replace(&mut picture[y][x], true) {
 				had_overlap = true;
 				break;
