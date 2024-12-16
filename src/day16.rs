@@ -119,7 +119,10 @@ pub fn part1(input: &str) -> u32 {
 	let end = input.find('E').map(|i| (i / row_length, i % row_length)).unwrap();
 	
 	let input = input.as_bytes();
-	go(|(row, col)| input.get(row * row_length.get() + col).is_some_and(|&b| b != b'#'), Reindeer::from_position(start), end,
+	// The input is surrounded by walls, so this shouldn't run into any issues with 'wrapping' off the edge, travelling along
+	// the newline characters, overflow off the top/left, etc. (or just flat out U.B. since switching to 'get_unchecked').
+	//                                   (using 'get_unchecked' seems to barely affect the runtime whatsoever btw) ^
+	go(|(row, col)| *unsafe{ input.get_unchecked(row * row_length.get() + col) } != b'#', Reindeer::from_position(start), end,
 			&mut BinaryHeap::with_capacity(256), &mut HashSet::with_capacity_and_hasher(20000, FxBuildHasher)).unwrap()
 }
 
@@ -214,7 +217,7 @@ pub fn part2(input: &str) -> usize {
 	let end = input.find('E').map(|i| (i / row_length, i % row_length)).unwrap();
 	
 	let input = input.as_bytes(); // Could probably at least prune dead ends first to make this a fair bit faster. Unfortunately, I am lazy.
-	go2(|(row, col)| input.get(row * row_length.get() + col).is_some_and(|&b| b != b'#'), Reindeer::from_position(start), end,
+	go2(|(row, col)| *unsafe{ input.get_unchecked(row * row_length.get() + col) } != b'#', Reindeer::from_position(start), end,
 			&mut BinaryHeap::with_capacity(1024), &mut HashMap::with_capacity_and_hasher(20000, FxBuildHasher)).unwrap()
 }
 
