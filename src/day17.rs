@@ -164,8 +164,70 @@ pub fn part1(input: &str) -> String {
 	}
 }
 
+// ungodly abomination that implements Backtracking™.
+fn test_thing(program: &[ThreeBit], /* initial_registers: [u64; 3], */ remaining: &[ThreeBit], running_total: u64 /*, shift_extra: bool */) -> Option<u64> {
+	let Some((&match_value, before)) = remaining.split_last() else {
+		return Some(running_total);
+	};
+	let match_index = before.len();
+	
+	let shift = match_index as u32 * 3 /* + if shift_extra { 3 } else { 0 } */;
+	let filler = (1 << shift) - 1;    //  ^ Only(?) relevant for sample input (which starts with A >>= 3). 
+	for test in 0..=7 {
+		let extra = test << shift;
+		let new_total = running_total | extra | filler;
+		
+		let mut registers = [new_total, 0, 0];
+		
+		let mut output_i = 0;
+		let mut index = 0;
+		let success = loop {
+			let Some([opcode, operand]) = program.get(index..index + 2).map(|slice| <[ThreeBit; 2]>::try_from(slice).unwrap()) else {
+				break false;
+			};
+			
+			match opcode.evaluate_as_instruction_with(operand, &mut registers) {
+				Ok(Continuation::Continue) => index += 2,
+				Ok(Continuation::JumpTo(i)) => index = i as usize,
+				Ok(Continuation::Output(val)) => {
+					if output_i == match_index {
+						break val == match_value;
+					} else {
+						output_i += 1;
+					}
+					
+					index += 2;
+				},
+				Err(_) => break false
+			}
+		};
+		
+		if success {
+			if let Some(result) = test_thing(program, /*initial_registers,*/ before, running_total | extra /*, shift_extra*/) {
+				return Some(result);
+			}
+		}
+	}
+	// eprintln!("[!] Couldn't find value to match index {match_index} (= {match_value}). (Reached {running_total}.)");
+	return None
+}
+
+
 #[aoc(day17, part2)]
 pub fn part2(input: &str) -> u64 {
+	let mut program = Vec::with_capacity(16);
+	program.extend(
+		input.split_once('P').unwrap().1["rogram: ".len()..]
+			.split(',').map(str::trim).map(str::parse).map(Result::unwrap)
+			.map(ThreeBit::from_char).map(Option::unwrap)
+	);
+	
+	test_thing(&program, &program, 0).unwrap()
+}
+
+
+#[allow(unused)]
+pub fn part2_initial(input: &str) -> u64 {
 	let mut program = Vec::with_capacity(16);
 	program.extend(
 		input.split_once('P').unwrap().1["rogram: ".len()..]
