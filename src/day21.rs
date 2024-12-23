@@ -1,5 +1,31 @@
 use std::{cmp::{Ordering, Reverse}, collections::BinaryHeap, fmt, iter, ops};
 
+#[derive(Copy, Eq, Clone, PartialEq)]
+enum Numpad {
+	B7 = 7, B8 = 8, B9 = 9,
+	B4 = 4, B5 = 5, B6 = 6,
+	B1 = 1, B2 = 2, B3 = 3,
+	        B0 = 0,  A = 10
+}
+
+impl Numpad {
+	fn from_value(value: u8) -> Option<Self> {
+		match value {
+			0 => Some(Self::B0),
+			1 => Some(Self::B1),
+			2 => Some(Self::B2),
+			3 => Some(Self::B3),
+			4 => Some(Self::B4),
+			5 => Some(Self::B5),
+			6 => Some(Self::B6),
+			7 => Some(Self::B7),
+			8 => Some(Self::B8),
+			9 => Some(Self::B9),
+			_ => None
+		}
+	}
+}
+
 #[derive(Copy, Default, Eq, Clone, PartialEq)]
 struct NumpadMap<T>([T; 11]);
 
@@ -86,14 +112,6 @@ fn fold<I: IntoIterator, T, F: FnMut(T, I::Item) -> T>(i: I, init: T, f: F) -> T
 // - Code for deriving above mappings:
 
 #[derive(Copy, Eq, Clone, PartialEq)]
-enum Numpad {
-	B7 = 7, B8 = 8, B9 = 9,
-	B4 = 4, B5 = 5, B6 = 6,
-	B1 = 1, B2 = 2, B3 = 3,
-	        B0 = 0,  A = 10
-}
-
-#[derive(Copy, Eq, Clone, PartialEq)]
 enum Dirpad {
 	           Up  = 2,   A   = 4,
 	Left = 0, Down = 1, Right = 3
@@ -130,39 +148,20 @@ trait Gridlike: Copy + Eq {
 	fn row(self) -> u8;
 	fn col(self) -> u8;
 	
-	#[allow(unused)] fn is_above(self, other: Self) -> bool    { self.row() < other.row() }
-	#[allow(unused)] fn is_below(self, other: Self) -> bool    { self.row() > other.row() }
-	#[allow(unused)] fn is_left_of(self, other: Self) -> bool  { self.col() < other.col() }
-	#[allow(unused)] fn is_right_of(self, other: Self) -> bool { self.col() < other.col() }
+	fn is_above(self, other: Self) -> bool    { self.row() < other.row() }
+	fn is_below(self, other: Self) -> bool    { self.row() > other.row() }
+	fn is_left_of(self, other: Self) -> bool  { self.col() < other.col() }
+	fn is_right_of(self, other: Self) -> bool { self.col() > other.col() }
 	
-//	fn worth_pressing_to_get_to(self, target: Self, button: Dirpad) -> bool {
-//		// return true;
-//		match button {
-//			Dirpad::Up => self.is_below(target),
-//			Dirpad::Down => self.is_above(target),
-//			
-//			Dirpad::Left => self.is_right_of(target),
-//			Dirpad::Right => self.is_left_of(target),
-//			
-//			Dirpad::A => self == target
-//		}
-//	}
-}
-
-impl Numpad {
-	fn from_value(value: u8) -> Option<Self> {
-		match value {
-			0 => Some(Self::B0),
-			1 => Some(Self::B1),
-			2 => Some(Self::B2),
-			3 => Some(Self::B3),
-			4 => Some(Self::B4),
-			5 => Some(Self::B5),
-			6 => Some(Self::B6),
-			7 => Some(Self::B7),
-			8 => Some(Self::B8),
-			9 => Some(Self::B9),
-			_ => None
+	fn worth_pressing_to_get_to(self, target: Self, button: Dirpad) -> bool {
+		match button {
+			Dirpad::Up => self.is_below(target),
+			Dirpad::Down => self.is_above(target),
+			
+			Dirpad::Left => self.is_right_of(target),
+			Dirpad::Right => self.is_left_of(target),
+			
+			Dirpad::A => self == target
 		}
 	}
 }
@@ -361,7 +360,6 @@ impl<T> Eq for State<T> {}
 
 // Asserts that all values of the type can be reached from any other value via
 // at least one possible sequence of 'worth pressing' up/down/left/right/A inputs.
-// (The 'worth pressing' criterion has since been removed.)
 unsafe trait AssertAllReachable : Gridlike {}
 
 unsafe impl AssertAllReachable for Numpad {}
@@ -377,12 +375,14 @@ fn navigation_cost<T: AssertAllReachable>(from: T, to: T, button_costs: &DirpadM
 			State::Ongoing{ cost, at, last_dir } => {
 				buffer.extend(
 					filter_map(Dirpad::ALL, |next_dir| {
-						let new_cost = cost + button_costs[last_dir][next_dir];
-						match at.after_move_input(next_dir) {
-							MoveResult::Pressed(button) if button == to => Some(State::Finished(new_cost)),
-							MoveResult::MovedTo(button) => Some(State::Ongoing{ cost: new_cost, at: button, last_dir: next_dir }),
-							MoveResult::Failed | MoveResult::Pressed(_) => None
-						}
+						at.worth_pressing_to_get_to(to, next_dir).then(|| {
+							let new_cost = cost + button_costs[last_dir][next_dir];
+							match at.after_move_input(next_dir) {
+								MoveResult::Pressed(button) if button == to => Some(State::Finished(new_cost)),
+								MoveResult::MovedTo(button) => Some(State::Ongoing{ cost: new_cost, at: button, last_dir: next_dir }),
+								MoveResult::Failed | MoveResult::Pressed(_) => None
+							}
+						}).flatten()
 					}).map(Reverse)
 				)
 			}
