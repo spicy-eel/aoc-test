@@ -449,8 +449,7 @@ impl DirpadMap<DirpadMap<u64>> {
 
 fn generate_numpad_costs(dirpads: u8, dir_buffer: &mut BinaryHeap<Reverse<State<Dirpad>>>,
 			num_buffer: &mut BinaryHeap<Reverse<State<Numpad>>>) -> NumpadMap<NumpadMap<u64>> {
-	// Overflows (and panics in debug mode) on dirpads > 47.
-	// Overflows and inf-loops (release mode) on dirpads > 48.
+	// Overflows (and panics in debug) on dirpads ≥ 47.
 	let mut button_costs = <DirpadMap<DirpadMap<u64>>>::ones();
 	for _ in 0..dirpads {
 		button_costs = calculate_movement_costs::<Dirpad>(&button_costs, dir_buffer);

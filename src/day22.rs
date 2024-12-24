@@ -46,3 +46,74 @@ pub fn part2(input: &str) -> u32 {
 	
 	max_bananas
 }
+
+
+#[allow(unused)]
+pub fn part2_30_minute_bruteforce(input: &str) -> u32 {
+	let initial_secrets: Vec<u32> = input.lines().filter_map(|line| {
+		match line.parse() {
+			Ok(secret) => Some(secret),
+			Err(error) => {
+				eprintln!("[v] Invalid number: '{line}' ({error})");
+				None
+			} 
+		}
+	}).collect();
+	
+	let mut max_bananas = 0u32;
+	for a in -9..=9 {
+		for b in -9..=9 {
+			for c in -9..=9 {
+				for d in -9..=9 {
+					if is_possible_sequence(a, b, c, d) {
+						let target = [a, b, c, d];
+						max_bananas = max_bananas.max(
+							map(&initial_secrets, |&init| {
+								let mut sequence = [i8::MIN, i8::MIN, i8::MIN, i8::MIN];
+								let mut previous = (init % 10) as i8;
+								let mut value = init;
+								for _ in 0..=2000 {
+									value = next(value);
+									let bananas = (value % 10) as i8;
+									sequence.rotate_left(1);
+									sequence[3] = bananas - previous;
+									previous = bananas;
+									if sequence == target {
+										//	if target == [-2, 1, -1, 3] {
+										//		eprintln!("[i] Got {bananas} bananas from monkey {init}.");
+										//	}
+										
+										return bananas as u32;
+									}
+								}
+								0
+							}).sum()
+						);
+					}
+				}
+			}
+		}
+	}
+
+	max_bananas
+}
+
+fn is_possible_sequence(a: i8, b: i8, c: i8, d: i8) -> bool {
+	for mut value in 0..=9 {
+		value += a;
+		if !(0..=9).contains(&value) { continue; }
+		value += b;
+		if !(0..=9).contains(&value) { continue; }
+		value += c;
+		if !(0..=9).contains(&value) { continue; }
+		value += d;
+		if !(0..=9).contains(&value) { continue; }
+		return true;
+	}
+	
+	false
+}
+
+fn map<I: IntoIterator, O, F: FnMut(I::Item) -> O>(i: I, f: F) -> std::iter::Map<I::IntoIter, F> {
+	i.into_iter().map(f)
+}
