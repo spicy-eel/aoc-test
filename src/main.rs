@@ -1,4 +1,4 @@
-#![feature(ascii_char, new_zeroed_alloc)]
+#![feature(ascii_char, binary_heap_into_iter_sorted, iter_next_chunk, new_zeroed_alloc)]
 extern crate aoc_test;
 extern crate aoc_runner_derive;
 extern crate aoc_runner;
