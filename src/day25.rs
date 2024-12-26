@@ -1,5 +1,35 @@
-// #![feature(iter_next_chunk)]
+// #![feature(iter_next_chunk)] (v1 only)
 use std::iter;
+
+const A: usize = "#####\n#####\n#####\n#####\n#####\n#####".len();
+const B: usize = "\n.....\n\n".len();
+
+#[aoc(day25, part1)]
+pub fn part1(input: &str) -> usize {
+	let mut locks = Vec::with_capacity(250);
+	let mut keys = Vec::with_capacity(250);
+	
+	let mut bytes = input.as_bytes();
+	while let Some((&chunk, after)) = bytes.split_first_chunk::<A>() {
+		let [kind, _, _, _, _, _, pins @ ..] = chunk;
+		let pins = pins.chunks(6).flat_map(|c| unsafe { *c.split_first_chunk::<5>().unwrap_unchecked().0 })
+				.fold(0, |acc, pin| (acc << 1) | (pin == b'#') as u32);
+		
+		(if kind == b'#' { &mut locks } else { &mut keys }).push(pins);
+		
+		bytes = after.get(B..).unwrap_or_default();
+	}
+	
+	map(keys, |key| filter(&locks, |&&lock| key & lock == 0).count()).sum()
+}
+
+fn filter<I: IntoIterator, F: FnMut(&I::Item) -> bool>(i: I, p: F) -> iter::Filter<I::IntoIter, F> {
+	i.into_iter().filter(p)
+}
+
+fn map<I: IntoIterator, O, F: FnMut(I::Item) -> O>(i: I, f: F) -> iter::Map<I::IntoIter, F> {
+	i.into_iter().map(f)
+}
 
 #[derive(Copy, Eq, Clone, PartialEq)]
 enum PinHeight {
@@ -124,8 +154,8 @@ fn parse_lock_or_key<T: AsRef<[u8]>>(input_lines: &[T; 7]) -> Result<Parsed, Par
 	})
 }
 
-#[aoc(day25, part1)]
-pub fn part1(input: &str) -> usize {
+#[allow(unused)]
+pub fn part1_v1(input: &str) -> usize {
 	let mut locks = Vec::with_capacity(250);
 	let mut keys = Vec::with_capacity(250);
 	
@@ -146,14 +176,6 @@ pub fn part1(input: &str) -> usize {
 
 fn enumerate<I: IntoIterator>(i: I) -> iter::Enumerate<I::IntoIter> {
 	i.into_iter().enumerate()
-}
-
-fn filter<I: IntoIterator, F: FnMut(&I::Item) -> bool>(i: I, p: F) -> iter::Filter<I::IntoIter, F> {
-	i.into_iter().filter(p)
-}
-
-fn map<I: IntoIterator, O, F: FnMut(I::Item) -> O>(i: I, f: F) -> iter::Map<I::IntoIter, F> {
-	i.into_iter().map(f)
 }
 
 
